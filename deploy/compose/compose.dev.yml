@@ -1,0 +1,77 @@
+services:
+  redis:
+    container_name: redis
+    build:
+      context: ../containers/redis
+      dockerfile: Dockerfile
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - atlas
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 1G
+
+  celery_worker:
+    build:
+      context: ../containers/celery # Define o contexto como a raiz do projeto
+      dockerfile: Dockerfile
+      args:
+        DOCKER_GID: ${DOCKER_GID:-998}
+    container_name: celery_worker
+    depends_on:
+      - redis
+    networks:
+      - atlas
+    environment:
+      PYTHONUNBUFFERED: 1
+      API_SECRET_KEY: "mysecretkey"
+      API_BASE_URL: "http://flask_api:5000"
+      CELERY_BROKER_URL: "redis://redis:6379/0"
+      CELERY_BACKEND_URL: "redis://redis:6379/1"
+      NXF_VER: "24.10.4"
+      NXF_HOME: "/home/lorrana/atlas/nextflow/.nextflow"
+      NXF_CACHE_DIR: "/home/lorrana/atlas/nextflow/cache"
+      NXF_TEMP: "/home/lorrana/atlas/nextflow/tmp"
+      NXF_OFFLINE: "false"
+      NXF_WORK: "/home/lorrana/atlas/nextflow/work"
+    deploy:
+      resources:
+        limits:
+          cpus: '24'
+          memory: 128G
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /home/lorrana/atlas/biodata:/home/lorrana/atlas/biodata
+      - /home/lorrana/atlas/bioflow:/home/lorrana/atlas/bioflow
+      - /home/lorrana/atlas/nextflow:/home/lorrana/atlas/nextflow
+      - ../../bioflow:/app # Monta a raiz do projeto no contêiner (opcional, para desenvolvimento)
+
+  flask_api:
+    build:
+      context: ../containers/flask
+      dockerfile: Dockerfile
+    container_name: "flask_api"
+    depends_on:
+      - redis
+      - celery_worker
+    ports:
+      - "5000:5000"
+    networks:
+      - atlas
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    volumes:
+      - ../../app:/app # Para facilitar desenvolvimento
+
+networks:
+  atlas:
+    driver: bridge
