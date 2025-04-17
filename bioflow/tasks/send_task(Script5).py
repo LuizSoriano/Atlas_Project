@@ -10,7 +10,7 @@ params = {
     "sliding_window": "4:15",
     "min_length": 40,
     "illumina_clip": "ILLUMINACLIP:/app/data/inputs/db/adapters/all_adapters.fa:2:30:10:2:True",
-    "salmon_index": "/app/data/inputs/Slycopersicum_691_ITAG4/salmon_index"
+    "salmon_index": "/app/data/inputs/Slycopersicum_691_ITAG4/salmon_index",
     "logfile": "/app/logs/nextflow.log",
     "config": "/app/config/nextflow.config",
     "pipeline_path": "/app/workflows/script5.nf"

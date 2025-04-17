@@ -3,7 +3,7 @@ from bioflow.task_queue import run_nextflow_pipeline
 # Parâmetros dinâmicos
 params = {
     "species": 'Slycopersicum',
-    "output_dir": "app/data/inputs/Slycopersicum_691_ITAG4/species_info"
+    "output_dir": "app/data/inputs/Slycopersicum_691_ITAG4/species_info",
     "logfile": "/app/logs/nextflow.log",
     "config": "/app/config/nextflow.config",
     "pipeline_path": "/app/workflows/script.nf"
