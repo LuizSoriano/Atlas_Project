@@ -1,0 +1,7 @@
+{
+    "name": "salmon_decoy_test",
+    "dockerFile": "./Dockerfile",
+    "context": ".",
+    "runArgs": [ "--network", "host"],
+    "remoteUser": "root"
+}
